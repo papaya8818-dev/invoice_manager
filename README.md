@@ -9,6 +9,9 @@
 - AppSheet
 - Excel
 
-## 開発予定
-- Googleスプレッドシートへの請求データ登録
-- AppSheetによる入金管理
+## 開発履歴
+
+- 2026-07-10 Git/GitHub環境構築
+- 2026-07-10 システム設計書を作成
+- 2026-07-10 Google Sheets API接続を実装
+
