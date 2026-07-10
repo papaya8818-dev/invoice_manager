@@ -26,3 +26,65 @@ AppSheet
 - 入金管理
 - 未入金アラート
 - 売上集計
+
+## Google Sheets連携
+
+### 認証方式
+- Google Sheets API
+- サービスアカウント認証
+- 認証情報は `credentials.json` を使用
+- `credentials.json` は `.gitignore` に登録し、GitHubには含めない
+
+### 接続方法
+- スプレッドシートIDを指定して接続
+- `open_by_key()` を使用する
+  - スプレッドシート名変更の影響を受けない
+  - Drive APIへのアクセスが不要
+  - 実務でも保守しやすい
+
+### データ構成
+
+|項目|
+|---|
+|請求書No|
+|送付日|
+|支払期限|
+|取引先|
+|案件名|
+|金額|
+|入金日|
+
+### 現在の実装状況
+- Google Sheets APIによる接続確認完了
+- Pythonからスプレッドシートへアクセス可能
+- 次回は請求データ1件登録機能を実装予定
+
+
+## フォルダ構成
+invoice-manager/
+├── docs/
+│   └── system_design.md
+├── src/
+│   └── register_invoice.py
+├── credentials.json
+├── .gitignore
+└── README.md
+
+
+## 実装済み
+### Google Sheets API
+
+## 今後実装予定
+- 請求データ登録
+- Excel請求書からデータ取得
+- AppSheetによる入金登録
+- 未入金アラート
+- 月別売上集計
+
+
+## 今後の開発予定
+- [ ] Googleスプレッドシートへ請求データ登録
+- [ ] Excel請求書からデータ取得
+- [ ] AppSheetによる入金登録
+- [ ] 未入金アラート
+- [ ] 月別売上集計
