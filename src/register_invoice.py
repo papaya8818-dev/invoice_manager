@@ -72,9 +72,25 @@ def read_invoice_from_excel(file_path):
     return invoice
 
 
+def is_duplicate_invoice_no(sheet, invoice_no):
+    """請求書Noの重複チェック"""
+    
+    # 請求書No列を取得（1行目の見出しを除外）
+    invoice_nos = sheet.col_values(1)[1:]
+
+    # 文字列として比較し、既存データに存在する場合はTrueを返す
+    return str(invoice_no) in invoice_nos   
+
+
 def register_invoice(sheet, invoice):
     """Googleスプレッドシートへ登録"""
   
+    invoice_no = invoice["請求書No"]
+
+    if is_duplicate_invoice_no(sheet, invoice_no):
+        print(f"登録済みの請求書Noです: {invoice_no}")
+        return False
+
     row = [
         invoice["請求書No"],
         invoice["送付日"],
@@ -87,6 +103,8 @@ def register_invoice(sheet, invoice):
 
     sheet.append_row(row)
 
+    return True
+
 def main():
     spreadsheet = authenticate()
     sheet = spreadsheet.sheet1
@@ -98,9 +116,12 @@ def main():
 
     invoice = read_invoice_from_excel(file_path)
 
-    register_invoice(sheet, invoice)
+    result = register_invoice(sheet, invoice)
 
-    print("請求データを登録しました！")
+    if result:
+        print("請求データを登録しました！")
+    else:
+        print("請求データの登録を中止しました。")
 
 if __name__ == "__main__":
     main()
