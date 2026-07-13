@@ -66,9 +66,9 @@ AppSheet
 1. Google Sheets APIで認証
 2. Excel請求書を読み込む
 3. 請求データを取得する
-4. 請求書Noの重複チェックを実施する
-5. 重複している場合は登録処理を中止する
-6. 未登録の場合はGoogle Sheetsへ登録する
+4. 請求書Noの重複チェックを実施
+5. Google Sheetsへ登録
+6. 登録エラーを処理
 
 ### Excel取得項目
 

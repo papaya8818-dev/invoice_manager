@@ -1,6 +1,7 @@
 from pathlib import Path
-
+from datetime import datetime
 import gspread
+from gspread.exceptions import SpreadsheetNotFound
 from google.oauth2.service_account import Credentials
 from openpyxl import load_workbook
 
@@ -30,21 +31,36 @@ def authenticate():
     credentials_path = BASE_DIR / "credentials.json"
 
     # 認証
-    creds = Credentials.from_service_account_file(
-        credentials_path,
-        scopes=SCOPES
-    )
+    try:
+        # 認証ファイル読み込み
+        creds = Credentials.from_service_account_file(
+            credentials_path,
+            scopes=SCOPES
+        )
 
-    gc = gspread.authorize(creds)
+        # Google Sheets API認証
+        gc = gspread.authorize(creds)
 
-    # スプレッドシートを開く
-    spreadsheet = gc.open_by_key(SPREADSHEET_ID)
+        # スプレッドシートを開く
+        spreadsheet = gc.open_by_key(SPREADSHEET_ID)
 
-    print("Google Sheetsへ接続できました！")
+        print("Google Sheetsへ接続できました！")
 
-    return spreadsheet
+        return spreadsheet
 
-    
+    except FileNotFoundError:
+        print("認証ファイルが見つかりません")
+        return None
+
+    except SpreadsheetNotFound:
+        print("指定したスプレッドシートが見つかりません")
+        return None
+
+    except Exception as e:
+        print(f"Google Sheets接続エラー: {e}")
+        return None
+
+
 def read_invoice_from_excel(file_path):
     """
     Excel請求書から請求データを読み込む。
@@ -56,21 +72,44 @@ def read_invoice_from_excel(file_path):
         dict: 請求データ
     """
 
-    wb = load_workbook(file_path, data_only=True)
-    ws = wb["請求書"]
+    try:
+        # Excelファイルを読み込み
+        wb = load_workbook(file_path, data_only=True)
 
-    invoice = {
-        "請求書No": ws["F2"].value,
-        "送付日": ws["F3"].value.strftime("%Y/%m/%d"),
-        "支払期限": ws["F4"].value.strftime("%Y/%m/%d"),
-        "取引先": ws["B3"].value,
-        "案件名": ws["B4"].value,
-        "金額": int(ws["F31"].value),
-        "入金日": ""
-    }
+        # 請求書シートを取得
+        ws = wb["請求書"]
 
-    return invoice
+        invoice = {
+            "請求書No": format_invoice_no(ws["F2"].value),
+            "送付日": ws["F3"].value.strftime("%Y/%m/%d"),
+            "支払期限": ws["F4"].value.strftime("%Y/%m/%d"),
+            "取引先": ws["B3"].value,
+            "案件名": ws["B4"].value,
+            "金額": int(ws["F31"].value),
+            "入金日": ""
+        }
 
+        return invoice
+
+    except FileNotFoundError:
+        print("請求書ファイルが見つかりません")
+        return None
+
+    except KeyError:
+        print("請求書シートが見つかりません")
+        return None
+
+    except Exception as e:
+        print(f"Excel読み込みエラー: {e}")
+        return None
+
+def format_invoice_no(value):
+    """請求書Noを文字列形式へ変換"""
+
+    if isinstance(value, datetime):
+        return value.strftime("%y%m-%d")
+
+    return str(value)
 
 def is_duplicate_invoice_no(sheet, invoice_no):
     """請求書Noの重複チェック"""
@@ -101,12 +140,21 @@ def register_invoice(sheet, invoice):
         invoice["入金日"],
     ]
 
-    sheet.append_row(row)
+    try:
+        sheet.append_row(row)
+
+    except Exception as e:
+        print(f"登録エラー: {e}")
+        return False
 
     return True
 
 def main():
     spreadsheet = authenticate()
+
+    if spreadsheet is None:
+        return
+
     sheet = spreadsheet.sheet1
 
     file_path = (
@@ -115,6 +163,9 @@ def main():
     )
 
     invoice = read_invoice_from_excel(file_path)
+
+    if invoice is None:
+        return
 
     result = register_invoice(sheet, invoice)
 
