@@ -63,23 +63,28 @@ AppSheet
 
 ### 処理フロー
 
-1. Google Sheets APIで認証
-2. スプレッドシートへ接続
-3. 請求データを辞書形式で作成
-4. 列順に合わせてリストへ変換
-5. `append_row()` で末尾へ追加
+1. Excel請求書を読み込む
+2. 必要項目を取得する
+3. Google Sheets APIで認証
+4. Googleスプレッドシートへ登録
 
-### データモデル
+### Excel取得項目
 
-|項目|型|
+|項目|セル|
 |---|---|
-|請求書No|string|
-|送付日|string|
-|支払期限|string|
-|取引先|string|
-|案件名|string|
-|金額|integer|
-|入金日|string|
+|請求書No|F2|
+|送付日|F3|
+|支払期限|F4|
+|取引先|B3|
+|案件名|B4|
+|金額|F31|
+
+### モジュール構成
+
+- authenticate()
+- read_invoice_from_excel()
+- register_invoice()
+- main()
 
 
 ## フォルダ構成
@@ -88,6 +93,8 @@ invoice-manager/
 │   └── system_design.md
 ├── src/
 │   └── register_invoice.py
+├── invoices/
+│   └── yymm-??_取引先_案件名.xlsx
 ├── credentials.json
 ├── .gitignore
 └── README.md
