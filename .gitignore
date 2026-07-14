@@ -1,3 +1,6 @@
 credentials.json
 logs/
 invoices/
+
+# Configuration
+config/config.ini

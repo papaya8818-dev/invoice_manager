@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 import logging
+from configparser import ConfigParser
 
 import gspread
 from gspread.exceptions import SpreadsheetNotFound
@@ -19,11 +20,34 @@ SCOPES = [
 # プロジェクトフォルダ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# スプレッドシートID
-SPREADSHEET_ID = "1h1iTqcLn7NHWqEc8Ndjge_pCN4kAiKAtboSyqjg3tGs"
+# 設定ファイル
+CONFIG_PATH = BASE_DIR / "config" / "config.ini"
 
-# 請求書フォルダ
-INVOICE_DIR = BASE_DIR / "invoices"
+
+def load_config():
+    """設定ファイル読み込み"""
+
+    config = ConfigParser()
+
+    if not CONFIG_PATH.exists():
+        raise FileNotFoundError(
+            "設定ファイルが見つかりません"
+        )
+
+    config.read(CONFIG_PATH, encoding="utf-8")
+
+    return config
+
+
+def get_settings():
+    """設定値取得"""
+
+    config = load_config()
+
+    spreadsheet_id = config["google"]["spreadsheet_id"]
+    invoice_dir = BASE_DIR / config["path"]["invoice_dir"]
+
+    return spreadsheet_id, invoice_dir
 
 # ログフォルダ
 LOG_DIR = BASE_DIR / "logs"
@@ -42,7 +66,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def authenticate():
+def authenticate(spreadsheet_id):
     """Google Sheetsへ接続"""
 
     # 認証ファイル
@@ -60,7 +84,7 @@ def authenticate():
         gc = gspread.authorize(creds)
 
         # スプレッドシートを開く
-        spreadsheet = gc.open_by_key(SPREADSHEET_ID)
+        spreadsheet = gc.open_by_key(spreadsheet_id)
 
         logger.info("Google Sheetsへ接続できました！")
 
@@ -168,7 +192,14 @@ def register_invoice(sheet, invoice):
     return True
 
 def main():
-    spreadsheet = authenticate()
+    try:
+        spreadsheet_id, invoice_dir = get_settings()
+
+    except Exception as e:
+        logger.error(f"設定読み込みエラー: {e}")
+        return
+
+    spreadsheet = authenticate(spreadsheet_id)
 
     if spreadsheet is None:
         return
@@ -176,7 +207,7 @@ def main():
     sheet = spreadsheet.sheet1
 
     file_path = (
-        INVOICE_DIR
+        invoice_dir
         / "2607-02_ミヤシタ技研_岡山営業所関連_HP更新・新ロゴ.xlsx"
     )
 
