@@ -1,5 +1,7 @@
 from pathlib import Path
 from datetime import datetime
+import logging
+
 import gspread
 from gspread.exceptions import SpreadsheetNotFound
 from google.oauth2.service_account import Credentials
@@ -23,6 +25,22 @@ SPREADSHEET_ID = "1h1iTqcLn7NHWqEc8Ndjge_pCN4kAiKAtboSyqjg3tGs"
 # 請求書フォルダ
 INVOICE_DIR = BASE_DIR / "invoices"
 
+# ログフォルダ
+LOG_DIR = BASE_DIR / "logs"
+
+# ログフォルダ作成
+LOG_DIR.mkdir(exist_ok=True)
+
+# ログ設定
+logging.basicConfig(
+    filename=LOG_DIR / "invoice_manager.log",
+    level=logging.INFO,
+    encoding="utf-8",
+    format="%(asctime)s %(levelname)s %(message)s"
+)
+
+logger = logging.getLogger(__name__)
+
 
 def authenticate():
     """Google Sheetsへ接続"""
@@ -44,20 +62,20 @@ def authenticate():
         # スプレッドシートを開く
         spreadsheet = gc.open_by_key(SPREADSHEET_ID)
 
-        print("Google Sheetsへ接続できました！")
+        logger.info("Google Sheetsへ接続できました！")
 
         return spreadsheet
 
     except FileNotFoundError:
-        print("認証ファイルが見つかりません")
+        logger.error("認証ファイルが見つかりません")
         return None
 
     except SpreadsheetNotFound:
-        print("指定したスプレッドシートが見つかりません")
+        logger.error("指定したスプレッドシートが見つかりません")
         return None
 
     except Exception as e:
-        print(f"Google Sheets接続エラー: {e}")
+        logger.exception(f"Google Sheets接続エラー: {e}")
         return None
 
 
@@ -92,15 +110,15 @@ def read_invoice_from_excel(file_path):
         return invoice
 
     except FileNotFoundError:
-        print("請求書ファイルが見つかりません")
+        logger.error("請求書ファイルが見つかりません")
         return None
 
     except KeyError:
-        print("請求書シートが見つかりません")
+        logger.error("請求書シートが見つかりません")
         return None
 
     except Exception as e:
-        print(f"Excel読み込みエラー: {e}")
+        logger.exception(f"Excel読み込みエラー: {e}")
         return None
 
 def format_invoice_no(value):
@@ -127,7 +145,7 @@ def register_invoice(sheet, invoice):
     invoice_no = invoice["請求書No"]
 
     if is_duplicate_invoice_no(sheet, invoice_no):
-        print(f"登録済みの請求書Noです: {invoice_no}")
+        logger.warning(f"登録済みの請求書Noです: {invoice_no}")
         return False
 
     row = [
@@ -144,7 +162,7 @@ def register_invoice(sheet, invoice):
         sheet.append_row(row)
 
     except Exception as e:
-        print(f"登録エラー: {e}")
+        logger.exception(f"登録エラー: {e}")
         return False
 
     return True
@@ -159,7 +177,7 @@ def main():
 
     file_path = (
         INVOICE_DIR
-        / "2607-02_ミヤシタ技研様_岡山営業所関連_HP更新・新ロゴ.xlsx"
+        / "2607-02_ミヤシタ技研_岡山営業所関連_HP更新・新ロゴ.xlsx"
     )
 
     invoice = read_invoice_from_excel(file_path)
@@ -170,9 +188,9 @@ def main():
     result = register_invoice(sheet, invoice)
 
     if result:
-        print("請求データを登録しました！")
+        logger.info("請求データを登録しました！")
     else:
-        print("請求データの登録を中止しました。")
+        logger.info(f"請求データの登録を中止しました。請求書No:{invoice['請求書No']}")
 
 if __name__ == "__main__":
     main()
