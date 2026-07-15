@@ -1,0 +1,5 @@
+[google]
+spreadsheet_id=YOUR_SPREADSHEET_ID
+
+[path]
+invoice_dir=invoices
