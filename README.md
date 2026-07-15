@@ -21,17 +21,18 @@ Excelで作成した請求書から請求データを取得し、Googleスプレ
 環境依存の設定値は `config.ini` で管理する。
 
 GitHub公開用に設定例ファイルを用意している。
-
-
 config/config.ini.example
 
-
 実行環境では設定例をコピーして利用する。
-
-
 config/config.ini
 
+## 実行方法
 
+請求書ファイル名を指定して実行する。
+
+```bash
+python src/register_invoice.py 請求書ファイル名.xlsx
+```
 
 ## 機能一覧
 
@@ -68,9 +69,7 @@ Python標準ライブラリ `logging` を利用し、処理結果やエラー情
 
 ログファイル：
 
-
 logs/invoice_manager.log
-
 
 
 ## Git管理
