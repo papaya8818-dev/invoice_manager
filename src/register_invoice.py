@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 import logging
+import sys
 from configparser import ConfigParser
 
 import gspread
@@ -48,6 +49,32 @@ def get_settings():
     invoice_dir = BASE_DIR / config["path"]["invoice_dir"]
 
     return spreadsheet_id, invoice_dir
+
+def get_invoice_file(invoice_dir):
+    """
+    コマンドライン引数から請求書ファイルを取得する
+    """
+
+    if len(sys.argv) < 2:
+        raise ValueError(
+            "請求書ファイル名を指定してください"
+        )
+
+    file_name = sys.argv[1]
+
+    file_path = invoice_dir / file_name
+
+    if not file_path.exists():
+        raise FileNotFoundError(
+            "指定した請求書ファイルが見つかりません"
+        )
+
+    if file_path.suffix.lower() != ".xlsx":
+        raise ValueError(
+            "Excelファイルを指定してください"
+        )
+
+    return file_path
 
 # ログフォルダ
 LOG_DIR = BASE_DIR / "logs"
@@ -108,7 +135,7 @@ def read_invoice_from_excel(file_path):
     Excel請求書から請求データを読み込む。
 
     Args:
-        file_path (str): 請求書ファイルのパス
+        file_path (Path): 請求書ファイルのパス
 
     Returns:
         dict: 請求データ
@@ -199,17 +226,20 @@ def main():
         logger.error(f"設定読み込みエラー: {e}")
         return
 
+    try:
+        file_path = get_invoice_file(invoice_dir)
+
+    except Exception as e:
+        logger.error(f"請求書取得エラー: {e}")
+        return
+
     spreadsheet = authenticate(spreadsheet_id)
 
     if spreadsheet is None:
         return
-
+    
     sheet = spreadsheet.sheet1
 
-    file_path = (
-        invoice_dir
-        / "2607-02_ミヤシタ技研_岡山営業所関連_HP更新・新ロゴ.xlsx"
-    )
 
     invoice = read_invoice_from_excel(file_path)
 
