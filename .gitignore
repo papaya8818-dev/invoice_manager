@@ -5,3 +5,7 @@ config/config.ini
 
 # Python virtual environment
 .venv/
+
+# Python cache
+__pycache__/
+*.pyc
