@@ -1,10 +1,13 @@
 from datetime import datetime
 
-from src.register_invoice import format_invoice_no
-from src.register_invoice import is_duplicate_invoice_no
 from openpyxl import Workbook
 
-from src.register_invoice import read_invoice_from_excel
+from src.register_invoice import (
+    format_invoice_no,
+    is_duplicate_invoice_no,
+    read_invoice_from_excel,
+    register_invoice,
+)
 
 
 class MockSheet:
@@ -15,6 +18,45 @@ class MockSheet:
             "2607-01",
             "2607-02",
         ]
+
+class MockRegisterSheet:
+
+    def __init__(self):
+        self.rows = []
+
+    def col_values(self, column):
+        return [
+            "請求書No",
+        ]
+
+    def append_row(self, row):
+        self.rows.append(row)
+
+
+class MockDuplicateSheet:
+
+    def __init__(self):
+        self.rows = []
+
+    def col_values(self, column):
+        return [
+            "請求書No",
+            "2607-01",
+        ]
+
+    def append_row(self, row):
+        self.rows.append(row)
+
+
+class MockErrorSheet:
+
+    def col_values(self, column):
+        return [
+            "請求書No",
+        ]
+
+    def append_row(self, row):
+        raise Exception("登録エラー")
     
 
 def test_is_duplicate_invoice_no_true():
@@ -113,3 +155,72 @@ def test_read_invoice_from_excel_sheet_not_found(tmp_path):
     invoice = read_invoice_from_excel(file_path)
 
     assert invoice is None
+
+
+def test_register_invoice_success():
+
+    sheet = MockRegisterSheet()
+
+    invoice = {
+        "請求書No": "2607-01",
+        "送付日": "2026/07/15",
+        "支払期限": "2026/08/31",
+        "取引先": "ミヤシタ技研",
+        "案件名": "HP更新",
+        "金額": 50000,
+        "入金日": "",
+    }
+
+    result = register_invoice(
+        sheet,
+        invoice
+    )
+
+    assert result is True
+    assert len(sheet.rows) == 1
+    assert sheet.rows[0][0] == "2607-01"
+
+
+def test_register_invoice_duplicate():
+
+    sheet = MockDuplicateSheet()
+
+    invoice = {
+        "請求書No": "2607-01",
+        "送付日": "2026/07/15",
+        "支払期限": "2026/08/31",
+        "取引先": "ミヤシタ技研",
+        "案件名": "HP更新",
+        "金額": 50000,
+        "入金日": "",
+    }
+
+    result = register_invoice(
+        sheet,
+        invoice
+    )
+
+    assert result is False
+    assert len(sheet.rows) == 0
+
+
+def test_register_invoice_error():
+
+    sheet = MockErrorSheet()
+
+    invoice = {
+        "請求書No": "2607-01",
+        "送付日": "2026/07/15",
+        "支払期限": "2026/08/31",
+        "取引先": "ミヤシタ技研",
+        "案件名": "HP更新",
+        "金額": 50000,
+        "入金日": "",
+    }
+
+    result = register_invoice(
+        sheet,
+        invoice
+    )
+
+    assert result is False
