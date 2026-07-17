@@ -7,6 +7,7 @@ from src.register_invoice import (
     is_duplicate_invoice_no,
     read_invoice_from_excel,
     register_invoice,
+    get_invoice_file,
 )
 
 
@@ -224,3 +225,57 @@ def test_register_invoice_error():
     )
 
     assert result is False
+
+
+def test_get_invoice_file_success(tmp_path):
+
+    invoice_dir = tmp_path
+
+    file_path = invoice_dir / "2607-01_test.xlsx"
+
+    file_path.touch()
+
+    import sys
+    sys.argv = [
+        "register_invoice.py",
+        "2607-01_test.xlsx"
+    ]
+
+    result = get_invoice_file(invoice_dir)
+
+    assert result == file_path
+
+
+def test_get_invoice_file_no_argument(tmp_path):
+
+    import sys
+
+    sys.argv = [
+        "register_invoice.py"
+    ]
+
+    try:
+        get_invoice_file(tmp_path)
+
+        assert False
+
+    except ValueError:
+        assert True
+
+
+def test_get_invoice_file_not_found(tmp_path):
+
+    import sys
+
+    sys.argv = [
+        "register_invoice.py",
+        "not_found.xlsx"
+    ]
+
+    try:
+        get_invoice_file(tmp_path)
+
+        assert False
+
+    except FileNotFoundError:
+        assert True
