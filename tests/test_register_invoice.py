@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytest
 from openpyxl import Workbook
 
 from src.register_invoice import (
@@ -254,13 +255,8 @@ def test_get_invoice_file_no_argument(tmp_path):
         "register_invoice.py"
     ]
 
-    try:
+    with pytest.raises(ValueError):
         get_invoice_file(tmp_path)
-
-        assert False
-
-    except ValueError:
-        assert True
 
 
 def test_get_invoice_file_not_found(tmp_path):
@@ -272,10 +268,5 @@ def test_get_invoice_file_not_found(tmp_path):
         "not_found.xlsx"
     ]
 
-    try:
+    with pytest.raises(FileNotFoundError):
         get_invoice_file(tmp_path)
-
-        assert False
-
-    except FileNotFoundError:
-        assert True
