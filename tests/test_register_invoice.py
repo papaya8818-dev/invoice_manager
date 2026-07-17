@@ -257,3 +257,23 @@ def test_get_invoice_file_not_found(tmp_path):
 
     with pytest.raises(FileNotFoundError):
         get_invoice_file(file_path)
+
+
+def test_register_invoice_no_empty():
+
+    sheet = MockRegisterSheet()
+
+    invoice = {
+        "請求書No": "",
+        "送付日": "",
+        "支払期限": "",
+        "取引先": "",
+        "案件名": "",
+        "金額": 0,
+        "入金日": "",
+    }
+
+    result = register_invoice(sheet, invoice)
+
+    assert result is False
+    
