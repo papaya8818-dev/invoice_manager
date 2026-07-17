@@ -1,6 +1,7 @@
 credentials.json
 logs/
 invoices/
-
-# Configuration
 config/config.ini
+
+# Python virtual environment
+.venv/
