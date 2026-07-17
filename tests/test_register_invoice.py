@@ -88,3 +88,28 @@ def test_read_invoice_from_excel(tmp_path):
     assert invoice["取引先"] == "ミヤシタ技研"
     assert invoice["案件名"] == "HP更新"
     assert invoice["金額"] == 50000
+
+
+def test_read_invoice_from_excel_file_not_found(tmp_path):
+
+    file_path = tmp_path / "not_found.xlsx"
+
+    invoice = read_invoice_from_excel(file_path)
+
+    assert invoice is None
+
+
+def test_read_invoice_from_excel_sheet_not_found(tmp_path):
+
+    file_path = tmp_path / "no_sheet.xlsx"
+
+    wb = Workbook()
+
+    ws = wb.active
+    ws.title = "Sheet1"
+
+    wb.save(file_path)
+
+    invoice = read_invoice_from_excel(file_path)
+
+    assert invoice is None
