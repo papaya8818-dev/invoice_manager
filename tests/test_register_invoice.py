@@ -9,6 +9,7 @@ from src.register_invoice import (
     read_invoice_from_excel,
     register_invoice,
     get_invoice_file,
+    parse_args,
 )
 
 
@@ -230,43 +231,29 @@ def test_register_invoice_error():
 
 def test_get_invoice_file_success(tmp_path):
 
-    invoice_dir = tmp_path
-
-    file_path = invoice_dir / "2607-01_test.xlsx"
+    file_path = tmp_path / "2607-01_test.xlsx"
 
     file_path.touch()
 
-    import sys
-    sys.argv = [
-        "register_invoice.py",
-        "2607-01_test.xlsx"
-    ]
-
-    result = get_invoice_file(invoice_dir)
+    result = get_invoice_file(file_path)
 
     assert result == file_path
 
 
-def test_get_invoice_file_no_argument(tmp_path):
+def test_parse_args_no_argument(monkeypatch):
 
-    import sys
+    monkeypatch.setattr(
+        "sys.argv",
+        ["register_invoice.py"]
+    )
 
-    sys.argv = [
-        "register_invoice.py"
-    ]
-
-    with pytest.raises(ValueError):
-        get_invoice_file(tmp_path)
+    with pytest.raises(SystemExit):
+        parse_args()
 
 
 def test_get_invoice_file_not_found(tmp_path):
 
-    import sys
-
-    sys.argv = [
-        "register_invoice.py",
-        "not_found.xlsx"
-    ]
+    file_path = tmp_path / "not_found.xlsx"
 
     with pytest.raises(FileNotFoundError):
-        get_invoice_file(tmp_path)
+        get_invoice_file(file_path)

@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 import logging
-import sys
+import argparse
 from configparser import ConfigParser
 
 import gspread
@@ -46,35 +46,37 @@ def get_settings():
     config = load_config()
 
     spreadsheet_id = config["google"]["spreadsheet_id"]
-    invoice_dir = BASE_DIR / config["path"]["invoice_dir"]
 
-    return spreadsheet_id, invoice_dir
+    return spreadsheet_id
 
-def get_invoice_file(invoice_dir):
+def get_invoice_file(file_path):
     """
-    コマンドライン引数から請求書ファイルを取得する
+    指定された請求書ファイルを取得する
     """
 
-    if len(sys.argv) < 2:
-        raise ValueError(
-            "請求書ファイル名を指定してください"
-        )
-
-    file_name = sys.argv[1]
-
-    file_path = invoice_dir / file_name
+    file_path = Path(file_path)
 
     if not file_path.exists():
         raise FileNotFoundError(
             "指定した請求書ファイルが見つかりません"
         )
 
-    if file_path.suffix.lower() != ".xlsx":
-        raise ValueError(
-            "Excelファイルを指定してください"
-        )
-
     return file_path
+
+
+def parse_args():
+    """コマンドライン引数解析"""
+
+    parser = argparse.ArgumentParser(
+        description="請求書登録処理"
+    )
+
+    parser.add_argument(
+        "file",
+        help="登録する請求書ファイル"
+    )
+
+    return parser.parse_args()
 
 # ログフォルダ
 LOG_DIR = BASE_DIR / "logs"
@@ -219,18 +221,16 @@ def register_invoice(sheet, invoice):
     return True
 
 def main():
-    try:
-        spreadsheet_id, invoice_dir = get_settings()
-
-    except Exception as e:
-        logger.error(f"設定読み込みエラー: {e}")
-        return
 
     try:
-        file_path = get_invoice_file(invoice_dir)
+        spreadsheet_id = get_settings()
+
+        args = parse_args()
+
+        file_path = get_invoice_file(args.file)
 
     except Exception as e:
-        logger.error(f"請求書取得エラー: {e}")
+        logger.error(f"初期処理エラー: {e}")
         return
 
     spreadsheet = authenticate(spreadsheet_id)
