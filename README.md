@@ -6,6 +6,18 @@
 
 Excelで作成した請求書から請求データを取得し、Googleスプレッドシートへ自動登録することで、請求管理業務の効率化を目的として開発。
 
+## システム構成
+
+Excel請求書
+↓
+Python
+↓
+Google Sheets API
+↓
+Googleスプレッドシート
+↓
+AppSheet（予定）
+
 ## 使用技術
 
 - Python
@@ -14,6 +26,9 @@ Excelで作成した請求書から請求データを取得し、Googleスプレ
 - AppSheet
 - Excel
 - Git / GitHub
+- openpyxl
+- gspread
+- pytest
 
 
 ## 設定管理
@@ -31,7 +46,7 @@ config/config.ini
 請求書ファイル名を指定して実行する。
 
 ```bash
-python src/register_invoice.py 請求書ファイル名.xlsx
+python src/register_invoice.py 請求書ファイル名.xlsx / .xlsm
 ```
 
 ## 機能一覧
@@ -87,7 +102,38 @@ pytest
 
 現在は以下の処理をテスト対象としている。
 
-- 請求書Noフォーマット変換処理
+- Excel請求データ読み込み
+- 請求データ登録処理
+- 請求書No重複チェック
+- 請求書No未入力チェック
+- 設定ファイル読み込み処理
+- ファイル存在チェック
+
+現在21件のテストが実行され、すべて成功している。
+
+
+## プロジェクト構成
+```
+invoice_manager/ 
+│ 
+├── src/ 
+│   ├── register_invoice.py 
+│   ├── invoice_service.py 
+│   ├── excel_reader.py 
+│   ├── sheets_client.py 
+│   ├── config.py 
+│   └── logger.py 
+│ 
+├── tests/ 
+│   ├── test_register_invoice.py 
+│   ├── test_invoice_service.py 
+│   └── test_config.py 
+│ 
+├── config/ 
+│   └── config.ini.example 
+│ 
+└── logs/ 
+```
 
 
 ## Git管理
@@ -122,3 +168,5 @@ Gitでソースコードおよびドキュメントの変更履歴を管理。
 - 2026-07-14 設定ファイル（config.ini）対応を追加
 - 2026-07-14 設定読み込み処理を関数化し、設定エラー処理を追加
 - 2026-07-15 設定ファイルサンプル（config.ini.example）を追加
+- 2026-07-21 処理機能をモジュール分割し、責務ごとに整理
+- 2026-07-21 モジュール分割後の単体テストを追加（21件）
