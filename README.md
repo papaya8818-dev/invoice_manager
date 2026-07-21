@@ -8,6 +8,7 @@ Excelで作成した請求書から請求データを取得し、Googleスプレ
 
 ## システム構成
 
+```
 Excel請求書
 ↓
 Python
@@ -17,6 +18,8 @@ Google Sheets API
 Googleスプレッドシート
 ↓
 AppSheet（予定）
+```
+
 
 ## 使用技術
 
