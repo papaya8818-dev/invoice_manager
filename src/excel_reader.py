@@ -54,10 +54,16 @@ def read_invoice_from_excel(file_path):
 
     try:
 
+        load_options = {
+            "data_only": True
+        }
+
+        if file_path.suffix.lower() == ".xlsm":
+            load_options["keep_vba"] = True
+
         wb = load_workbook(
             file_path,
-            data_only=True,
-            keep_vba=True,
+            **load_options
         )
 
         ws = wb["請求書"]

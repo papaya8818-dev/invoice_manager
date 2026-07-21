@@ -6,9 +6,9 @@ from google.oauth2.service_account import Credentials
 
 from src.logger import logger
 
+
 # プロジェクトフォルダ
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Google Sheets APIのスコープ
 SCOPES = [
@@ -51,3 +51,13 @@ def authenticate(spreadsheet_id):
     except Exception as e:
         logger.exception(f"Google Sheets接続エラー: {e}")
         return None
+    
+    
+def is_duplicate_invoice_no(sheet, invoice_no):
+    """請求書Noの重複チェック"""
+    
+    # 請求書No列を取得（1行目の見出しを除外）
+    invoice_nos = sheet.col_values(1)[1:]
+
+    # 文字列として比較し、既存データに存在する場合はTrueを返す
+    return str(invoice_no) in invoice_nos   

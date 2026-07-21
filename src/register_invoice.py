@@ -2,7 +2,10 @@ from pathlib import Path
 import argparse
 
 from src.logger import logger
-from src.sheets_client import authenticate
+from src.sheets_client import (
+    authenticate,
+    is_duplicate_invoice_no,
+)
 from src.config import get_settings
 
 
@@ -47,16 +50,6 @@ def parse_args():
     )
 
     return parser.parse_args()
-
-def is_duplicate_invoice_no(sheet, invoice_no):
-    """請求書Noの重複チェック"""
-    
-    # 請求書No列を取得（1行目の見出しを除外）
-    invoice_nos = sheet.col_values(1)[1:]
-
-    # 文字列として比較し、既存データに存在する場合はTrueを返す
-    return str(invoice_no) in invoice_nos   
-
 
 def register_invoice(sheet, invoice):
     """Googleスプレッドシートへ登録"""

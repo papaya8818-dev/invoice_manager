@@ -9,10 +9,13 @@ from src.excel_reader import (
 )
 
 from src.register_invoice import (
-    is_duplicate_invoice_no,
     register_invoice,
     get_invoice_file,
     parse_args,
+)
+
+from src.sheets_client import (
+    is_duplicate_invoice_no,
 )
 
 
@@ -125,7 +128,7 @@ def test_read_invoice_from_excel(tmp_path):
     ws["F31"] = 50000
 
     wb.save(file_path)
-
+    wb.close()
 
     # 関数実行
     invoice = read_invoice_from_excel(file_path)
@@ -157,6 +160,7 @@ def test_read_invoice_from_excel_sheet_not_found(tmp_path):
     ws.title = "Sheet1"
 
     wb.save(file_path)
+    wb.close()
 
     invoice = read_invoice_from_excel(file_path)
 
