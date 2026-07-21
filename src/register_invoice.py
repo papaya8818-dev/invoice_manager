@@ -1,24 +1,11 @@
 from pathlib import Path
 import argparse
 
-from src.excel_reader import read_invoice_from_excel
 from src.logger import logger
-from src.sheets_client import authenticate
 from src.config import get_settings
+from src.excel_reader import read_invoice_from_excel
+from src.sheets_client import authenticate
 from src.invoice_service import register_invoice
-
-
-# =========================
-# 設定
-# =========================
-
-# Google Sheets APIのスコープ
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets"
-]
-
-# プロジェクトフォルダ
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def get_invoice_file(file_path):
@@ -50,40 +37,52 @@ def parse_args():
 
     return parser.parse_args()
 
-def main():
 
-    logger.info("Python処理開始")
+def process_invoice(file_path):
+    """
+    請求書登録処理
+    """
 
-    try:
-        spreadsheet_id = get_settings()
-
-        args = parse_args()
-
-        file_path = get_invoice_file(args.file)
-
-    except Exception as e:
-        logger.error(f"初期処理エラー: {e}")
-        return
+    spreadsheet_id = get_settings()
 
     spreadsheet = authenticate(spreadsheet_id)
 
     if spreadsheet is None:
-        return
-    
-    sheet = spreadsheet.sheet1
+        return False
 
+    sheet = spreadsheet.sheet1
 
     invoice = read_invoice_from_excel(file_path)
 
     if invoice is None:
-        return
+        return False
 
     result = register_invoice(sheet, invoice)
 
     if result:
         logger.info("請求データを登録しました！")
     else:
-        logger.info(f"請求データの登録を中止しました。請求書No:{invoice['請求書No']}")
+        logger.info(
+            f"請求データの登録を中止しました。請求書No:{invoice['請求書No']}"
+        )
+
+    return result
+
+
+def main():
+
+    logger.info("Python処理開始")
+
+    try:
+        args = parse_args()
+
+        file_path = get_invoice_file(args.file)
+
+        process_invoice(file_path)
+
+    except Exception as e:
+        logger.exception(f"処理エラー: {e}")
+        return
 
 if __name__ == "__main__":
     main()
