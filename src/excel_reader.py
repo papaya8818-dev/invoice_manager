@@ -2,7 +2,7 @@ from datetime import datetime
 
 from openpyxl import load_workbook
 
-from src.register_invoice import logger
+from src.logger import logger
 
 
 def format_date(value):
