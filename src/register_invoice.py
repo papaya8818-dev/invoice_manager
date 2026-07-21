@@ -3,11 +3,9 @@ import argparse
 
 from src.excel_reader import read_invoice_from_excel
 from src.logger import logger
-from src.sheets_client import (
-    authenticate,
-    is_duplicate_invoice_no,
-)
+from src.sheets_client import authenticate
 from src.config import get_settings
+from src.invoice_service import register_invoice
 
 
 # =========================
@@ -51,38 +49,6 @@ def parse_args():
     )
 
     return parser.parse_args()
-
-def register_invoice(sheet, invoice):
-    """Googleスプレッドシートへ登録"""
-  
-    invoice_no = invoice["請求書No"]
-
-    if not invoice_no:
-        logger.warning("請求書Noが未入力です")
-        return False
-    
-    if is_duplicate_invoice_no(sheet, invoice_no):
-        logger.warning(f"登録済みの請求書Noです: {invoice_no}")
-        return False
-
-    row = [
-        invoice["請求書No"],
-        invoice["送付日"],
-        invoice["支払期限"],
-        invoice["取引先"],
-        invoice["案件名"],
-        invoice["金額"],
-        invoice["入金日"],
-    ]
-
-    try:
-        sheet.append_row(row)
-
-    except Exception as e:
-        logger.exception(f"登録エラー: {e}")
-        return False
-
-    return True
 
 def main():
 

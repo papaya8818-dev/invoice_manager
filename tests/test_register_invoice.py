@@ -9,13 +9,13 @@ from src.excel_reader import (
 )
 
 from src.register_invoice import (
-    register_invoice,
     get_invoice_file,
     parse_args,
 )
 
-from src.sheets_client import (
+from src.invoice_service import (
     is_duplicate_invoice_no,
+    register_invoice,
 )
 
 
