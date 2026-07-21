@@ -1,13 +1,13 @@
 from pathlib import Path
-from datetime import datetime
-import logging
 import argparse
 from configparser import ConfigParser
 
 import gspread
 from gspread.exceptions import SpreadsheetNotFound
 from google.oauth2.service_account import Credentials
-from openpyxl import load_workbook
+
+from src.logger import logger
+
 
 # =========================
 # 設定
@@ -23,33 +23,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 設定ファイル
 CONFIG_PATH = BASE_DIR / "config" / "config.ini"
-
-def format_date(value):
-    """日付を文字列へ変換"""
-
-    if value is None:
-        return ""
-
-    if isinstance(value, datetime):
-        return value.strftime("%Y/%m/%d")
-
-    return str(value)
-
-def format_amount(value):
-    """金額を整数へ変換"""
-
-    if value is None:
-        return 0
-
-    return int(value)
-
-def format_text(value):
-    """文字列項目を変換"""
-
-    if value is None:
-        return ""
-
-    return str(value)
 
 def load_config():
     """設定ファイル読み込み"""
@@ -104,22 +77,6 @@ def parse_args():
 
     return parser.parse_args()
 
-# ログフォルダ
-LOG_DIR = BASE_DIR / "logs"
-
-# ログフォルダ作成
-LOG_DIR.mkdir(exist_ok=True)
-
-# ログ設定
-logging.basicConfig(
-    filename=LOG_DIR / "invoice_manager.log",
-    level=logging.INFO,
-    encoding="utf-8",
-    format="%(asctime)s %(levelname)s %(message)s"
-)
-
-logger = logging.getLogger(__name__)
-
 
 def authenticate(spreadsheet_id):
     """Google Sheetsへ接続"""
@@ -156,70 +113,6 @@ def authenticate(spreadsheet_id):
     except Exception as e:
         logger.exception(f"Google Sheets接続エラー: {e}")
         return None
-
-
-def read_invoice_from_excel(file_path):
-    """
-    Excel請求書から請求データを読み込む。
-
-    Args:
-        file_path (Path): 請求書ファイルのパス
-
-    Returns:
-        dict: 請求データ
-    """
-
-    wb = None
-
-    try:
-        # Excelファイルを読み込み
-        wb = load_workbook(
-            file_path,
-            data_only=True,
-            keep_vba=True
-        )
-
-        # 請求書シートを取得
-        ws = wb["請求書"]
-
-        invoice = {
-            "請求書No": format_invoice_no(ws["F2"].value),
-            "送付日": format_date(ws["F3"].value),
-            "支払期限": format_date(ws["F4"].value),
-            "取引先": format_text(ws["B3"].value),
-            "案件名": format_text(ws["B4"].value),
-            "金額": format_amount(ws["F31"].value),
-            "入金日": ""
-        }
-
-        return invoice
-
-    except FileNotFoundError:
-        logger.error("請求書ファイルが見つかりません")
-        return None
-
-    except KeyError:
-        logger.error("請求書シートが見つかりません")
-        return None
-
-    except Exception as e:
-        logger.exception(f"Excel読み込みエラー: {e}")
-        return None
-    
-    finally:
-        if wb:
-            wb.close()
-
-def format_invoice_no(value):
-    """請求書Noを文字列形式へ変換"""
-
-    if value is None:
-        return ""
-    
-    if isinstance(value, datetime):
-        return value.strftime("%y%m-%d")
-
-    return str(value)
 
 def is_duplicate_invoice_no(sheet, invoice_no):
     """請求書Noの重複チェック"""

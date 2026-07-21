@@ -3,10 +3,13 @@ from datetime import datetime
 import pytest
 from openpyxl import Workbook
 
-from src.register_invoice import (
+from src.excel_reader import (
     format_invoice_no,
-    is_duplicate_invoice_no,
     read_invoice_from_excel,
+)
+
+from src.register_invoice import (
+    is_duplicate_invoice_no,
     register_invoice,
     get_invoice_file,
     parse_args,
