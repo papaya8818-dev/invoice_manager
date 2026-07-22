@@ -53,8 +53,9 @@ config/config.ini
 請求書ファイル名を指定して実行する。
 
 ```bash
-python src/register_invoice.py 請求書ファイル名.xlsx
+python -m src.register_invoice 請求書ファイル名.xlsx
 ```
+（プロジェクト直下で実行）
 
 対応形式：
 - .xlsx
@@ -74,9 +75,35 @@ python src/register_invoice.py 請求書ファイル名.xlsx
 
 - Googleスプレッドシートをデータソースとして利用
 - 請求一覧画面を作成
-- 未入金一覧画面を作成
+- 未入金一覧ビューを作成
 - 入金日をAppSheetから更新可能
 - 入金日をもとに入金状態を自動判定
+
+### 動作確認済みフロー
+
+以下の一連の処理を実データ形式（xlsm）で確認済み。
+
+```
+Excel請求書（xlsm）
+    ↓
+VBAからPython起動
+    ↓
+Excel請求データ取得
+    ↓
+Googleスプレッドシート登録
+    ↓
+AppSheet請求一覧表示
+    ↓
+AppSheetから入金日更新
+    ↓
+入金状態反映
+```
+
+確認内容：
+- xlsx / xlsmファイル読み込み
+- Google Sheets API登録
+- ログ出力
+- AppSheet表示・更新
 
 ### エラー処理
 
@@ -192,3 +219,5 @@ Gitでソースコードおよびドキュメントの変更履歴を管理。
 - 2026-07-21 処理機能をモジュール分割し、責務ごとに整理（Excel処理・Sheets処理・設定管理・ログ管理）
 - 2026-07-21 モジュール分割後の単体テストを追加（21件）
 - 2026-07-21 AppSheet連携を実装（請求一覧・未入金一覧・入金管理機能）
+- 2026-07-22 VBA連携による請求登録処理の動作確認を実施
+- 2026-07-22 実データによるExcel→Python→Sheets→AppSheet連携を確認
