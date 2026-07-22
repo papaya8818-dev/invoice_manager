@@ -1,26 +1,26 @@
 from src.logger import logger
 
+
 def is_duplicate_invoice_no(sheet, invoice_no):
     """請求書Noの重複チェック"""
-    
-    # 請求書No列を取得（1行目の見出しを除外）
+
     invoice_nos = sheet.col_values(1)[1:]
 
-    # 文字列として比較し、既存データに存在する場合はTrueを返す
-    return str(invoice_no) in invoice_nos   
+    return str(invoice_no) in invoice_nos
+
 
 def register_invoice(sheet, invoice):
     """Googleスプレッドシートへ登録"""
-  
+
     invoice_no = invoice["請求書No"]
 
     if not invoice_no:
         logger.warning("請求書Noが未入力です")
-        return False
-    
+        return "ERROR"
+
     if is_duplicate_invoice_no(sheet, invoice_no):
         logger.warning(f"登録済みの請求書Noです: {invoice_no}")
-        return False
+        return "DUPLICATE"
 
     row = [
         invoice["請求書No"],
@@ -34,9 +34,10 @@ def register_invoice(sheet, invoice):
 
     try:
         sheet.append_row(row)
+        logger.info(f"請求データを登録しました: {invoice_no}")
 
     except Exception as e:
         logger.exception(f"登録エラー: {e}")
-        return False
+        return "ERROR"
 
-    return True
+    return "SUCCESS"

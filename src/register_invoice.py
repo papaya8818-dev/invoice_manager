@@ -48,42 +48,45 @@ def process_invoice(file_path):
     spreadsheet = authenticate(spreadsheet_id)
 
     if spreadsheet is None:
-        return False
+        return "ERROR"
 
     sheet = spreadsheet.sheet1
 
     invoice = read_invoice_from_excel(file_path)
 
     if invoice is None:
-        return False
+        return "ERROR"
 
     result = register_invoice(sheet, invoice)
-
-    if result:
-        logger.info("請求データを登録しました！")
-    else:
-        logger.info(
-            f"請求データの登録を中止しました。請求書No:{invoice['請求書No']}"
-        )
 
     return result
 
 
-def main():
 
-    logger.info("Python処理開始")
+def main():
 
     try:
         args = parse_args()
 
         file_path = get_invoice_file(args.file)
 
-        process_invoice(file_path)
+        result = process_invoice(file_path)
+
+        if result == "SUCCESS":
+            logger.info("処理正常終了")
+            return 0
+        
+        elif result == "DUPLICATE":
+            return 2
+        
+        else:
+            logger.error("処理失敗")
+            return 1
 
     except Exception as e:
         logger.exception(f"処理エラー: {e}")
-        return
+        return 1
 
 if __name__ == "__main__":
-    main()
+    exit(main())
     
