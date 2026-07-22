@@ -53,6 +53,8 @@ config/config.ini
 
 ## 実行方法
 
+### Pythonから直接実行する場合
+
 請求書ファイル名を指定して実行する。
 
 ```bash
@@ -63,6 +65,27 @@ python -m src.register_invoice 請求書ファイル名.xlsx
 対応形式：
 - .xlsx
 - .xlsm
+
+### Excel VBAから実行する場合
+
+請求書Excelファイルに設定したVBAマクロからPython処理を起動する。
+
+処理フロー：
+```
+Excel VBA
+    ↓
+Python起動
+    ↓
+請求データ取得
+    ↓
+Googleスプレッドシート登録
+    ↓
+終了コード返却
+    ↓
+VBAで結果表示
+```
+
+利用者はExcel上の操作のみで請求登録処理を実行できる。
 
 
 ## 機能一覧

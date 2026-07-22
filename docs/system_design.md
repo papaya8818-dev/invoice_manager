@@ -158,7 +158,7 @@ Python処理結果を以下の3種類で管理する。
 |DUPLICATE|請求書No重複により登録なし|
 |ERROR|処理エラー|
 
-VBA側では終了コードを取得し、利用者へ処理結果を通知する。
+VBA側ではPythonの終了コードを取得し、SUCCESS/DUPLICATE/ERRORに応じて利用者へ処理結果を通知する。
 
 ### Excel取得項目
 
