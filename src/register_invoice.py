@@ -50,7 +50,7 @@ def process_invoice(file_path):
     if spreadsheet is None:
         return "ERROR"
 
-    sheet = spreadsheet.sheet1
+    sheet = spreadsheet.worksheet("請求データ")
 
     invoice = read_invoice_from_excel(file_path)
 
